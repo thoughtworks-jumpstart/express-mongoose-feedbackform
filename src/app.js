@@ -3,6 +3,9 @@ app = express();
 
 app.use(express.urlencoded({ extended: true }));
 
+const companiesRouter = require("./routes/companies.route");
+app.use("/companies", companiesRouter);
+
 app.get("/", (req, res) => {
   res.json({
     "0": "GET /",
