@@ -71,7 +71,7 @@ describe("companies", () => {
         .get("/companies")
         .expect(200);
       actualCompanies.sort((a, b) => a.id > b.id);
-      expect(actualCompanies).toMatchObject(expectedCompanies);
+      expect(actualCompanies).toEqual(expectedCompanies);
     });
   });
 });
