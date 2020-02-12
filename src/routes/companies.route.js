@@ -12,6 +12,16 @@ const findAllWithProjection = async (req, res, next) => {
   res.send(companies);
 };
 
+const findOne = async (req, res, next) => {
+  const company = await Company.findOne(
+    { id: req.params.id },
+    "-_id -__v -reviews._id"
+  );
+  res.send(company);
+};
+
 router.get("/", wrapAsync(findAllWithProjection));
+
+router.get("/:id", wrapAsync(findOne));
 
 module.exports = router;
