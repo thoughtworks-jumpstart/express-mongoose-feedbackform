@@ -1,6 +1,7 @@
 express = require("express");
 app = express();
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const companiesRouter = require("./routes/companies.route");
@@ -14,5 +15,15 @@ app.get("/", (req, res) => {
     "3": "GET /companies/:id",
     "4": "POST /companies/:id/reviews",
   });
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.statusCode || 500);
+  console.error(err);
+  if (err.statusCode) {
+    res.send({ error: err.message });
+  } else {
+    res.send({ error: "internal server error" });
+  }
 });
 module.exports = app;

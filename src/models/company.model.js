@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const reviewSchema = Schema({
+  id: { type: String, required: true },
+  userId: { type: String, required: true },
+  userName: { type: String, required: true },
+  rating: { type: Number, required: true },
+  title: { type: String, required: true },
+  review: { type: String, required: true },
+});
+
 const companySchema = Schema({
   id: {
     type: String,
@@ -23,16 +32,7 @@ const companySchema = Schema({
     type: String,
     required: true,
   },
-  reviews: [
-    {
-      id: { type: String, required: true },
-      userId: { type: String, required: true },
-      userName: { type: String, required: true },
-      rating: { type: Number, required: true },
-      title: { type: String, required: true },
-      review: { type: String, required: true },
-    },
-  ],
+  reviews: [reviewSchema],
 });
 
 const Company = mongoose.model("Company", companySchema);
