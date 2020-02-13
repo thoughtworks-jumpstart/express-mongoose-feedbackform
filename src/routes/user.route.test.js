@@ -90,4 +90,31 @@ describe("user", () => {
       expect(actualUser).toEqual(expectedUser);
     });
   });
+  describe("/user/login", () => {
+    it("should log user in when password is correct", async () => {
+      const correctUser = {
+        password: "123456789",
+        userName: "Sonia Schaefer",
+      };
+      const { text: message } = await request(app)
+        .post("/user/login")
+        .send(correctUser)
+        .expect(200);
+      expect(message).toEqual("You are now logged in!");
+    });
+
+    it("should not log trainer in when password is incorrect", async () => {
+      const wrongTrainer = {
+        password: "wrongpassword",
+        userName: "Sonia Schaefer",
+      };
+      const { body: message } = await request(app)
+        .post("/user/login")
+        .send(wrongTrainer)
+        .expect(400);
+      expect(message).toEqual({ error: "Login failed" });
+    });
+  });
+
+  
 });

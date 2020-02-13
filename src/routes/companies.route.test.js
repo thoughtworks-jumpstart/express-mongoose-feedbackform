@@ -3,7 +3,7 @@ const app = require("../app");
 const {
   setupMongoServer,
   tearDownMongoServer,
-} = require("../utils/testing-mongoose");
+} = require("../utils/testingMongoose");
 const Company = require("../models/company.model");
 const User = require("../models/user.model");
 const mongoose = require("mongoose");
@@ -227,6 +227,30 @@ describe("companies", () => {
       expect(error.error).toContain("validation failed");
 
       expect(jwt.verify).toHaveBeenCalledTimes(1);
+    });
+
+    it("POST should deny access when no token is provided", async () => {
+      const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
+      const { body: error } = await request(app)
+        .post(`/companies/${companyId}/reviews`)
+        .expect(401);
+      expect(jwt.verify).not.toHaveBeenCalled();
+      expect(error).toEqual({ error: "You are not authorized" });
+    });
+    it("POST should deny access when token is invalid", async () => {
+      const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
+      const errorMessage = "your token is invalid";
+      jwt.verify.mockImplementationOnce(() => {
+        throw new Error(errorMessage);
+      });
+
+      const { body: error } = await request(app)
+        .post(`/companies/${companyId}/reviews`)
+        .set("Cookie", "token=invalid-token")
+        .expect(401);
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+      expect(error.error).toEqual(errorMessage);
     });
   });
 });
