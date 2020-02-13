@@ -5,6 +5,8 @@ const Company = require("../models/company.model");
 const wrapAsync = require("../utils/wrapAsync");
 const generateRandomId = require("../utils/generateRandomId");
 
+const { protectRoute } = require("../../middlewares/auth");
+
 const findAllWithProjection = async (req, res, next) => {
   const companies = await Company.find(
     {},
@@ -46,7 +48,7 @@ router.get("/", wrapAsync(findAllWithProjection));
 
 router.get("/:id", wrapAsync(findOne));
 
-router.post("/:id/reviews", wrapAsync(createOneReview));
+router.post("/:id/reviews", protectRoute, wrapAsync(createOneReview));
 
 router.use((err, req, res, next) => {
   if (err.name === "ValidationError") {

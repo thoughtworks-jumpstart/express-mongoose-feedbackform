@@ -7,6 +7,9 @@ const {
 const Company = require("../../src/models/company.model");
 const mongoose = require("mongoose");
 
+const jwt = require("jsonwebtoken");
+jest.mock("jsonwebtoken");
+
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
@@ -57,6 +60,7 @@ describe("companies", () => {
   });
 
   afterEach(async () => {
+    jest.resetAllMocks();
     await Company.deleteMany();
   });
 
@@ -118,7 +122,7 @@ describe("companies", () => {
   });
 
   describe("/companies/:id/reviews", () => {
-    it("POST should add a review to the correct company", async () => {
+    it("POST should add a review to the correct company when logged in", async () => {
       const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
       const expectedReviews = [
         {
@@ -155,27 +159,37 @@ describe("companies", () => {
           "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
       };
 
+      jwt.verify.mockReturnValueOnce({});
+
       const { body: actualReviews } = await request(app)
         .post(`/companies/${companyId}/reviews`)
+        .set("Cookie", "token=valid-token")
         .send(newReview)
         .expect(201);
 
       expect(actualReviews).toMatchObject(expectedReviews);
       expect(actualReviews[2]).toHaveProperty("id");
       expect(actualReviews[2]).not.toHaveProperty("_id");
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
     });
 
-    it("POST should respond with error 400 when required property not given", async () => {
+    it("POST should respond with error 400 when required property not given and logged in", async () => {
       const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
       const incorrectReview = {
         rating: 4,
         title: "eligendi adipisci",
       };
+      jwt.verify.mockReturnValueOnce({});
+
       const { body: error } = await request(app)
         .post(`/companies/${companyId}/reviews`)
+        .set("Cookie", "token=valid-token")
         .send(incorrectReview)
         .expect(400);
       expect(error.error).toContain("validation failed");
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
     });
   });
 });
