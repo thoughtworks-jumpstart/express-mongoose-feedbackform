@@ -1,11 +1,17 @@
+require("dotenv").config();
 express = require("express");
 app = express();
+const cookieParser = require("cookie-parser");
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const companiesRouter = require("./routes/companies.route");
 app.use("/companies", companiesRouter);
+
+const userRouter = require("./routes/user.route");
+app.use("/user", userRouter);
 
 app.get("/", (req, res) => {
   res.json({
