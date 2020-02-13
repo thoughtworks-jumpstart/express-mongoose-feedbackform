@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 const reviewSchema = Schema({
   id: { type: String, required: true },
   userId: { type: String, required: true },
-  userName: { type: String, required: true },
   rating: { type: Number, required: true },
   title: { type: String, required: true },
   review: { type: String, required: true },

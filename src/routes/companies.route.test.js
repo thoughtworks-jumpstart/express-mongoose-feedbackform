@@ -4,7 +4,8 @@ const {
   setupMongoServer,
   tearDownMongoServer,
 } = require("../utils/testing-mongoose");
-const Company = require("../../src/models/company.model");
+const Company = require("../models/company.model");
+const User = require("../models/user.model");
 const mongoose = require("mongoose");
 
 const jwt = require("jsonwebtoken");
@@ -38,7 +39,6 @@ describe("companies", () => {
           {
             id: "7da4d967-715b-4dc1-a74b-82a7992704f3",
             userId: "f6e016e6-e254-4375-bf82-797e6c00e3eb",
-            userName: "Brennan Fisher",
             rating: 0,
             title: "eligendi adipisci",
             review:
@@ -47,7 +47,6 @@ describe("companies", () => {
           {
             id: "fa07ef47-5849-4642-8af0-640e4887b1e6",
             userId: "13d0782f-2793-4c83-8279-93c9a03b3ac3",
-            userName: "Annalise Nicolas",
             rating: 4,
             title: "iusto consequatur",
             review:
@@ -56,12 +55,32 @@ describe("companies", () => {
         ],
       },
     ];
+
     await Company.create(companiesData);
+    const usersData = [
+      {
+        id: "f6e016e6-e254-4375-bf82-797e6c00e3eb",
+        password: "123456789",
+        firstName: "Brennan",
+        lastName: "Fisher",
+        email: "Bre.Fish@hotmail.com",
+      },
+      {
+        id: "13d0782f-2793-4c83-8279-93c9a03b3ac3",
+        password: "123456789",
+        firstName: "Annalise",
+        lastName: "Nicolas",
+        email: "AnnaNico@hotmail.com",
+      },
+    ];
+
+    await User.create(usersData);
   });
 
   afterEach(async () => {
     jest.resetAllMocks();
     await Company.deleteMany();
+    await User.deleteMany();
   });
 
   describe("/companies", () => {
@@ -124,34 +143,14 @@ describe("companies", () => {
   describe("/companies/:id/reviews", () => {
     it("POST should add a review to the correct company when logged in", async () => {
       const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
-      const expectedReviews = [
-        {
-          id: "7da4d967-715b-4dc1-a74b-82a7992704f3",
-          userId: "f6e016e6-e254-4375-bf82-797e6c00e3eb",
-          userName: "Brennan Fisher",
-          rating: 0,
-          title: "eligendi adipisci",
-          review:
-            "Consequatur esse beatae voluptate voluptatibus expedita aperiam perspiciatis cumque voluptatem. Cum quasi dolor ut dignissimos illum magni eos. Et aspernatur illum commodi.",
-        },
-        {
-          id: "fa07ef47-5849-4642-8af0-640e4887b1e6",
-          userId: "13d0782f-2793-4c83-8279-93c9a03b3ac3",
-          userName: "Annalise Nicolas",
-          rating: 4,
-          title: "iusto consequatur",
-          review:
-            "Facere dicta delectus impedit sunt sed officia omnis. Officiis vel optio corrupti iure. Atque iusto nemo. Ut voluptas quaerat omnis quis impedit maiores nihil ipsam. Quod ea sed voluptates. Dolorem officia esse enim.",
-        },
-        {
-          userId: "754aece9-64bf-42ab-b91c-bb65e2db3a37",
-          userName: "Humberto Bruen",
-          rating: 4,
-          title: "eligendi adipisci",
-          review:
-            "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
-        },
-      ];
+      const expectedReview = {
+        userId: "754aece9-64bf-42ab-b91c-bb65e2db3a37",
+        userName: "Humberto Bruen",
+        rating: 4,
+        title: "eligendi adipisci",
+        review:
+          "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
+      };
       const newReview = {
         rating: 4,
         title: "eligendi adipisci",
@@ -159,17 +158,55 @@ describe("companies", () => {
           "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
       };
 
-      jwt.verify.mockReturnValueOnce({});
+      jwt.verify.mockReturnValueOnce({
+        id: `${expectedReview.userId}`,
+        userName: `${expectedReview.userName}`,
+      });
 
-      const { body: actualReviews } = await request(app)
+      const { body: actualReview } = await request(app)
         .post(`/companies/${companyId}/reviews`)
         .set("Cookie", "token=valid-token")
         .send(newReview)
         .expect(201);
 
-      expect(actualReviews).toMatchObject(expectedReviews);
-      expect(actualReviews[2]).toHaveProperty("id");
-      expect(actualReviews[2]).not.toHaveProperty("_id");
+      expect(actualReview).toMatchObject(expectedReview);
+      expect(actualReview).toHaveProperty("id");
+      expect(actualReview).not.toHaveProperty("_id");
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+    });
+
+    it("POST should add a review  with the correct user when logged in", async () => {
+      const companyId = "e5cc2c0a-93b5-4014-8910-6ed9f3056456";
+      const expectedReview = {
+        userId: "13d0782f-2793-4c83-8279-93c9a03b3ac3",
+        userName: "Annalise Nicolas",
+        rating: 4,
+        title: "eligendi adipisci",
+        review:
+          "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
+      };
+      const newReview = {
+        rating: 4,
+        title: "eligendi adipisci",
+        review:
+          "Et voluptatem voluptas quisquam quos officia assumenda. Mollitia delectus vitae quia molestias nulla ut hic praesentium. Sed et assumenda et iusto velit laborum sunt non.",
+      };
+
+      jwt.verify.mockReturnValueOnce({
+        id: `${expectedReview.userId}`,
+        userName: `${expectedReview.userName}`,
+      });
+
+      const { body: actualReview } = await request(app)
+        .post(`/companies/${companyId}/reviews`)
+        .set("Cookie", "token=valid-token")
+        .send(newReview)
+        .expect(201);
+
+      expect(actualReview).toMatchObject(expectedReview);
+      expect(actualReview).toHaveProperty("id");
+      expect(actualReview).not.toHaveProperty("_id");
 
       expect(jwt.verify).toHaveBeenCalledTimes(1);
     });

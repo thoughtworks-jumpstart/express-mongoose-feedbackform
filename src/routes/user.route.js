@@ -15,8 +15,7 @@ const createOneUser = async (req, res, next) => {
 };
 
 const getMyUser = async (req, res, next) => {
-  req.userId = "754aece9-64bf-42ab-b91c-bb65e2db3a37";
-  const user = await User.findOne({ id: req.userId }, "-__v -_id -password");
+  const user = await User.findOne({ id: req.user.id }, "-__v -_id -password");
   res.send(user);
 };
 router.post("/register", wrapAsync(createOneUser));

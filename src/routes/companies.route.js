@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Company = require("../models/company.model");
+const User = require("../models/user.model");
 const wrapAsync = require("../utils/wrapAsync");
 const generateRandomId = require("../utils/generateRandomId");
 
@@ -20,28 +21,26 @@ const findOne = async (req, res, next) => {
     { id: req.params.id },
     "-_id -__v -reviews._id"
   );
-  res.send(company);
+  const companyObj = company.toObject();
+  for (const review of companyObj.reviews) {
+    const userId = review.userId;
+    const user = await User.findOne({ id: userId });
+    review["userName"] = user.userName;
+  }
+  res.send(companyObj);
 };
 
 const createOneReview = async (req, res, next) => {
   const company = await Company.findOne({ id: req.params.id });
   const newReview = req.body;
   newReview.id = generateRandomId();
-  newReview.userName = "Humberto Bruen";
-  newReview.userId = "754aece9-64bf-42ab-b91c-bb65e2db3a37";
+
+  newReview.userName = req.user.userName;
+  newReview.userId = req.user.id;
+
   company.reviews.push(newReview);
   await company.save();
-  const companyReviews = await Company.findOne(
-    { id: req.params.id },
-    "reviews"
-  );
-
-  const newReviews = companyReviews.reviews.map(
-    ({ id, review, rating, title, userId, userName }) => {
-      return { id, rating, review, title, userId, userName };
-    }
-  );
-  res.status(201).send(newReviews);
+  res.status(201).send(newReview);
 };
 
 router.get("/", wrapAsync(findAllWithProjection));
