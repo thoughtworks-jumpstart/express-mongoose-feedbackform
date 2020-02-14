@@ -63,6 +63,7 @@ const loginUser = async (req, res, next) => {
 
     res.cookie("token", token, {
       expires: expiryDate,
+      secure: false,
     });
 
     res.send("You are now logged in!");
