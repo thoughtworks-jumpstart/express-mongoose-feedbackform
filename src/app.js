@@ -4,7 +4,13 @@ app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
