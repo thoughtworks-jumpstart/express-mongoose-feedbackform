@@ -6,8 +6,6 @@ const cors = require("cors");
 
 const corsOptions = {
   credentials: true,
-  allowedHeaders: "content-type",
-  origin: "http://localhost:3001", // for the frontend server
 };
 
 app.use(cors(corsOptions));

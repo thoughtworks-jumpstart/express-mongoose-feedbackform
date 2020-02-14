@@ -24,9 +24,8 @@ const findOne = async (req, res, next) => {
   const companyObj = company.toObject();
   for (const review of companyObj.reviews) {
     const userId = review.userId;
-    const user = await User.findOne({ id: userId });
-    console.log(user.userName);
-    review["userName"] = user.userName;
+    const user = await User.findOne({ id: userId }, "firstName lastName");
+    review.userName = user.firstName + " " + user.lastName;
   }
   res.send(companyObj);
 };
