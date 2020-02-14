@@ -12,6 +12,8 @@ describe("/", () => {
       "2": "GET /companies",
       "3": "GET /companies/:id",
       "4": "POST /companies/:id/reviews",
+      "5": "POST /user/login",
+      "6": "POST /user/logout"
     });
   });
 });

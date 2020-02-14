@@ -11,7 +11,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(cookieParser());
+app.use(cookieParser("secret"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,6 +28,8 @@ app.get("/", (req, res) => {
     "2": "GET /companies",
     "3": "GET /companies/:id",
     "4": "POST /companies/:id/reviews",
+    "5": "POST /user/login",
+    "6": "POST /user/logout",
   });
 });
 
