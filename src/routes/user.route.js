@@ -64,7 +64,7 @@ const loginUser = async (req, res, next) => {
     res.cookie("token", token, {
       expires: expiryDate,
       secure: false,
-      sameSite: "lax",
+      sameSite: "none",
       signed: true,
     });
 
