@@ -13,8 +13,8 @@ const createOneUser = async (req, res, next) => {
   const user = new User(req.body);
   await User.init();
   user.id = generateRandomId();
-  const newUser = await user.save();
-  res.status(201).send(newUser);
+  await user.save();
+  res.status(201).send(user.toObject());
 };
 
 const getMyUser = async (req, res, next) => {

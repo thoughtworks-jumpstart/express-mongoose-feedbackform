@@ -30,6 +30,7 @@ userSchema.virtual("userName").get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
+userSchema.set("toObject", { getters: true });
 userSchema.index({ firstName: 1, lastName: 1 }, { unique: true });
 
 userSchema.pre("save", async function(next) {

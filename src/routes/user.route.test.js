@@ -14,6 +14,8 @@ jest.mock("jsonwebtoken");
 
 describe("user", () => {
   let mongoServer;
+  let signedInAgent;
+
   beforeAll(async () => {
     try {
       mongoServer = new MongoMemoryServer();
@@ -65,29 +67,10 @@ describe("user", () => {
         .post("/user/register")
         .send(expectedUser)
         .expect(201);
-
-      expect(user.username).toBe(expectedUser.username);
+      expect(user.userName).toBe(
+        expectedUser.firstName + " " + expectedUser.lastName
+      );
       expect(user.password).not.toBe(expectedUser.password);
-    });
-  });
-
-  describe("/user", () => {
-    it("GET should respond with the user I am logged in with", async () => {
-      const expectedUser = {
-        id: "754aece9-64bf-42ab-b91c-bb65e2db3a37",
-        firstName: "Humberto",
-        lastName: "Bruen",
-        email: "Timothy_VonRueden62@hotmail.com",
-      };
-      jwt.verify.mockReturnValueOnce({ id: expectedUser.id });
-
-      const { body: actualUser } = await request(app)
-        .get(`/user`)
-        .set("Cookie", "token=valid-token")
-        .expect(200);
-
-      expect(jwt.verify).toHaveBeenCalledTimes(1);
-      expect(actualUser).toEqual(expectedUser);
     });
   });
   describe("/user/login", () => {
@@ -96,7 +79,8 @@ describe("user", () => {
         password: "123456789",
         userName: "Sonia Schaefer",
       };
-      const { text: message } = await request(app)
+      signedInAgent = request.agent(app);
+      const { text: message } = await signedInAgent
         .post("/user/login")
         .send(correctUser)
         .expect(200);
@@ -116,5 +100,20 @@ describe("user", () => {
     });
   });
 
-  
+  describe("/user", () => {
+    it("GET should respond with the user I am logged in with", async () => {
+      const expectedUser = {
+        id: "754aece9-64bf-42ab-b91c-bb65e2db3a37",
+        firstName: "Humberto",
+        lastName: "Bruen",
+        email: "Timothy_VonRueden62@hotmail.com",
+      };
+      jwt.verify.mockReturnValueOnce({ id: expectedUser.id });
+
+      const { body: actualUser } = await signedInAgent.get(`/user`).expect(200);
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+      expect(actualUser).toEqual(expectedUser);
+    });
+  });
 });
