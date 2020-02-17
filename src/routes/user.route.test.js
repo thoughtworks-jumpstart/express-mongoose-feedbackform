@@ -67,6 +67,7 @@ describe("user", () => {
         .post("/user/register")
         .send(expectedUser)
         .expect(201);
+      console.log(user);
       expect(user.userName).toBe(
         expectedUser.firstName + " " + expectedUser.lastName
       );

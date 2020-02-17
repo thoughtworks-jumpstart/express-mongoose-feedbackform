@@ -13,7 +13,13 @@ describe("/", () => {
       "3": "GET /companies/:id",
       "4": "POST /companies/:id/reviews",
       "5": "POST /user/login",
-      "6": "POST /user/logout"
+      "6": "POST /user/logout",
     });
+  });
+  it("GET invalid path should return error", async () => {
+    const { body } = await request(app)
+      .get("/abc")
+      .expect(404);
+    expect(body.error).toEqual("page not found");
   });
 });

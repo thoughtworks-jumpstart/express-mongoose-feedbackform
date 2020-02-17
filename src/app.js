@@ -33,6 +33,12 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/*", (req, res, next) => {
+  const error = new Error("page not found");
+  error.statusCode = 404;
+  next(error);
+});
+
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500);
   console.error(err);

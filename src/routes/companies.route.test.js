@@ -18,8 +18,15 @@ mongoose.set("useUnifiedTopology", true);
 
 describe("companies", () => {
   let mongoServer;
+  let signedInAgent;
   beforeAll(async () => {
     mongoServer = await setupMongoServer();
+    const correctUser = {
+      password: "123456789",
+      userName: "Annalise Nicolas",
+    };
+    signedInAgent = request.agent(app);
+    await signedInAgent.get("/user/signedcookies").expect(200);
   });
 
   afterAll(async () => {
@@ -163,9 +170,8 @@ describe("companies", () => {
         userName: `${expectedReview.userName}`,
       });
 
-      const { body: actualReview } = await request(app)
+      const { body: actualReview } = await signedInAgent
         .post(`/companies/${companyId}/reviews`)
-        .set("Cookie", "token=valid-token")
         .send(newReview)
         .expect(201);
 
@@ -198,9 +204,8 @@ describe("companies", () => {
         userName: `${expectedReview.userName}`,
       });
 
-      const { body: actualReview } = await request(app)
+      const { body: actualReview } = await signedInAgent
         .post(`/companies/${companyId}/reviews`)
-        .set("Cookie", "token=valid-token")
         .send(newReview)
         .expect(201);
 
@@ -219,9 +224,8 @@ describe("companies", () => {
       };
       jwt.verify.mockReturnValueOnce({});
 
-      const { body: error } = await request(app)
+      const { body: error } = await signedInAgent
         .post(`/companies/${companyId}/reviews`)
-        .set("Cookie", "token=valid-token")
         .send(incorrectReview)
         .expect(400);
       expect(error.error).toContain("validation failed");
@@ -244,7 +248,7 @@ describe("companies", () => {
         throw new Error(errorMessage);
       });
 
-      const { body: error } = await request(app)
+      const { body: error } = await signedInAgent
         .post(`/companies/${companyId}/reviews`)
         .set("Cookie", "token=invalid-token")
         .expect(401);
