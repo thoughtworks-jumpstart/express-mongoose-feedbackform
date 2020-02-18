@@ -76,7 +76,7 @@ router.post("/register", wrapAsync(createOneUser));
 router.get("/", protectRoute, wrapAsync(getMyUser));
 router.post(
   "/login",
-  wrapAsync(createLoginToken),
+  createLoginToken,
   createSignedCookieWithToken,
   sendLoggedInMessage
 );

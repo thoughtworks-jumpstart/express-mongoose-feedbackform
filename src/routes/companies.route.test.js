@@ -21,17 +21,11 @@ describe("companies", () => {
   let signedInAgent;
   beforeAll(async () => {
     mongoServer = await setupMongoServer();
-    const correctUser = {
-      password: "123456789",
-      userName: "Annalise Nicolas",
-    };
     signedInAgent = request.agent(app);
     await signedInAgent.get("/user/signedcookies").expect(200);
   });
 
-  afterAll(async () => {
-    await tearDownMongoServer(mongoServer);
-  });
+  afterAll(async () => await tearDownMongoServer(mongoServer));
 
   beforeEach(async () => {
     const companiesData = [
