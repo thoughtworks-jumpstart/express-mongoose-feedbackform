@@ -35,9 +35,11 @@ userSchema.set("toObject", { getters: true });
 userSchema.index({ firstName: 1, lastName: 1 }, { unique: true });
 
 userSchema.pre("save", async function(next) {
-  const rounds = 10;
-  this.password = await bcrypt.hash(this.password, rounds);
-  next();
+  if (this.isModified("password")) {
+    const rounds = 10;
+    this.password = await bcrypt.hash(this.password, rounds);
+    next();
+  }
 });
 
 const User = mongoose.model("User", userSchema);
