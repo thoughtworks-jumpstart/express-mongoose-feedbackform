@@ -2,33 +2,16 @@ const request = require("supertest");
 const app = require("../app");
 const User = require("../../src/models/user.model");
 const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-
-mongoose.set("useNewUrlParser", true);
-mongoose.set("useFindAndModify", false);
-mongoose.set("useCreateIndex", true);
-mongoose.set("useUnifiedTopology", true);
-
 const jwt = require("jsonwebtoken");
+
 jest.mock("jsonwebtoken");
 
 describe("user", () => {
-  let mongoServer;
   let signedInAgent;
 
-  beforeAll(async () => {
-    try {
-      mongoServer = new MongoMemoryServer();
-      const mongoUri = await mongoServer.getConnectionString();
-      await mongoose.connect(mongoUri);
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
   afterAll(async () => {
+    // proper teardown of mongoose to prevent leaks
     await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   beforeEach(async () => {
@@ -67,13 +50,13 @@ describe("user", () => {
         .post("/user/register")
         .send(expectedUser)
         .expect(201);
-      console.log(user);
       expect(user.userName).toBe(
         expectedUser.firstName + " " + expectedUser.lastName
       );
       expect(user.password).not.toBe(expectedUser.password);
     });
   });
+
   describe("/user/login", () => {
     it("should log user in when password is correct", async () => {
       const correctUser = {
