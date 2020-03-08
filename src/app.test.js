@@ -1,7 +1,11 @@
 const request = require("supertest");
 const app = require("./app");
 
+const { teardownMongoose } = require("../test/mongoose");
+
 describe("/", () => {
+  afterAll(async () => teardownMongoose());
+
   it("GET should return a list of endpoints", async () => {
     const { body } = await request(app)
       .get("/")

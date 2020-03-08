@@ -1,18 +1,16 @@
 const request = require("supertest");
 const app = require("../app");
 const User = require("../../src/models/user.model");
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
 
+const { teardownMongoose } = require("../../test/mongoose");
+
+const jwt = require("jsonwebtoken");
 jest.mock("jsonwebtoken");
 
 describe("user", () => {
   let signedInAgent;
 
-  afterAll(async () => {
-    // proper teardown of mongoose to prevent leaks
-    await mongoose.disconnect();
-  });
+  afterAll(async () => await teardownMongoose());
 
   beforeEach(async () => {
     const usersData = [

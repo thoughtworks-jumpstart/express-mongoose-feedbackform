@@ -1,31 +1,20 @@
 const request = require("supertest");
 const app = require("../app");
-const {
-  setupMongoServer,
-  tearDownMongoServer,
-} = require("../utils/testingMongoose");
 const Company = require("../models/company.model");
 const User = require("../models/user.model");
-const mongoose = require("mongoose");
 
+const { teardownMongoose } = require("../../test/mongoose");
 const jwt = require("jsonwebtoken");
 jest.mock("jsonwebtoken");
 
-mongoose.set("useNewUrlParser", true);
-mongoose.set("useFindAndModify", false);
-mongoose.set("useCreateIndex", true);
-mongoose.set("useUnifiedTopology", true);
-
 describe("companies", () => {
-  let mongoServer;
   let signedInAgent;
   beforeAll(async () => {
-    mongoServer = await setupMongoServer();
     signedInAgent = request.agent(app);
     await signedInAgent.get("/user/signedcookies").expect(200);
   });
 
-  afterAll(async () => await tearDownMongoServer(mongoServer));
+  afterAll(async () => await teardownMongoose());
 
   beforeEach(async () => {
     const companiesData = [
