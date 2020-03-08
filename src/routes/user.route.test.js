@@ -33,6 +33,7 @@ describe("user", () => {
   });
 
   afterEach(async () => {
+    jest.resetAllMocks();
     await User.deleteMany();
   });
 

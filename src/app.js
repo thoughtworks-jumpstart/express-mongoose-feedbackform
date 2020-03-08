@@ -43,7 +43,10 @@ app.get("/*", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500);
-  console.error(err);
+  if (process.env.NODE_ENV === "development") {
+    console.error(err);
+  }
+
   if (err.statusCode) {
     res.send({ error: err.message });
   } else {
