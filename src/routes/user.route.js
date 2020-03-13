@@ -25,30 +25,24 @@ router.post("/logout", (req, res) => {
 });
 
 const createLoginToken = async (req, res, next) => {
-  try {
-    // TODO: do validation here
-    const { userName, password } = req.body;
-    const firstName = userName.split(" ")[0];
-    const lastName = userName.split(" ")[1];
-    const user = await User.findOne({ firstName, lastName });
-    if (!user) {
-      throw new Error("Login failed");
-    }
-    const result = await bcrypt.compare(password, user.password);
+  // TODO: do validation here
+  const loginError = new Error("Login failed");
+  loginError.statusCode = 400;
 
-    if (!result) {
-      throw new Error("Login failed");
-    }
-
-    const token = createJWTToken(user.id, user.userName);
-    req.token = token;
-    next();
-  } catch (err) {
-    if (err.message === "Login failed") {
-      err.statusCode = 400;
-    }
-    next(err);
+  const { userName, password } = req.body;
+  const firstName = userName.split(" ")[0];
+  const lastName = userName.split(" ")[1];
+  const user = await User.findOne({ firstName, lastName });
+  if (!user) {
+    throw loginError;
   }
+  const result = await bcrypt.compare(password, user.password);
+  if (!result) {
+    throw loginError;
+  }
+  const token = createJWTToken(user.id, user.userName);
+  req.token = token;
+  next();
 };
 
 const createSignedCookieWithToken = (req, res, next) => {
@@ -76,7 +70,7 @@ router.post("/register", wrapAsync(createOneUser));
 router.get("/", protectRoute, wrapAsync(getMyUser));
 router.post(
   "/login",
-  createLoginToken,
+  wrapAsync(createLoginToken),
   createSignedCookieWithToken,
   sendLoggedInMessage
 );

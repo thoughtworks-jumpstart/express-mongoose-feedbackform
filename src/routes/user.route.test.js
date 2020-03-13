@@ -54,6 +54,19 @@ describe("user", () => {
       );
       expect(user.password).not.toBe(expectedUser.password);
     });
+
+    it("POST should not add a new user when user posted is incorrect", async () => {
+      const expectedUser = {
+        firstName: "Aber",
+        password: "123456789",
+        email: "Aber_Hoo@gmail.com",
+      };
+      const { body: user } = await request(app)
+        .post("/user/register")
+        .send(expectedUser)
+        .expect(400);
+      expect(user.error).toContain("User validation failed");
+    });
   });
 
   describe("/user/login", () => {
